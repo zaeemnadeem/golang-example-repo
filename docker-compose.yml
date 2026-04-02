@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: signage-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: signage
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  screen-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: screen-service
+    container_name: screen-service
+    environment:
+      - ENV=production
+      - SCREEN_PORT=8001
+      - CONTENT_SERVICE_ADDR=content-service:50052
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/signage?sslmode=disable
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  content-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: content-service
+    container_name: content-service
+    environment:
+      - ENV=production
+      - CONTENT_PORT=50052
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/signage?sslmode=disable
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

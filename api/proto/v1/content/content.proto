@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package content.v1;
+
+option go_package = "github.com/zaeemnadeem/golang-example-repo/api/proto/v1/content;content";
+
+// ContentService manages media content delivery and assignment to screens
+service ContentService {
+  rpc CreateContent(CreateContentRequest) returns (CreateContentResponse);
+  rpc AssignContentToScreen(AssignContentToScreenRequest) returns (AssignContentToScreenResponse);
+  rpc GetScreenContent(GetScreenContentRequest) returns (GetScreenContentResponse);
+}
+
+enum ContentType {
+  CONTENT_TYPE_UNSPECIFIED = 0;
+  CONTENT_TYPE_IMAGE = 1;
+  CONTENT_TYPE_VIDEO = 2;
+  CONTENT_TYPE_HTML = 3;
+}
+
+message Content {
+  string id = 1;
+  string title = 2;
+  string url = 3;
+  ContentType type = 4;
+  int32 duration_seconds = 5;
+  int64 created_at = 6;
+}
+
+message CreateContentRequest {
+  string title = 1;
+  string url = 2;
+  ContentType type = 3;
+  int32 duration_seconds = 4;
+}
+
+message CreateContentResponse {
+  Content content = 1;
+}
+
+message AssignContentToScreenRequest {
+  string content_id = 1;
+  string screen_id = 2;
+}
+
+message AssignContentToScreenResponse {
+  bool success = 1;
+}
+
+message GetScreenContentRequest {
+  string screen_id = 1;
+}
+
+message GetScreenContentResponse {
+  repeated Content contents = 1;
+}

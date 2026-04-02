@@ -1,0 +1,330 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Public HTTP API for the Screen Service.",
+        "title": "Signage Microservices API",
+        "contact": {},
+        "version": "1.0.0"
+    },
+    "host": "localhost:8001",
+    "basePath": "/",
+    "paths": {
+        "/screens": {
+            "post": {
+                "description": "Provisions a new digital signage screen in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Screens"
+                ],
+                "summary": "Create a new screen",
+                "parameters": [
+                    {
+                        "description": "Screen creation info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.CreateScreenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Screen"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/screens/{id}": {
+            "get": {
+                "description": "Retrieves the metadata of a specific screen.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Screens"
+                ],
+                "summary": "Get screen by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the screen",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Screen"
+                        }
+                    },
+                    "404": {
+                        "description": "Screen not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/screens/{id}/content": {
+            "get": {
+                "description": "Retrieves the currently assigned media contents for a given screen from the internal microservice.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Get content assigned to screen",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the screen",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Content"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "failed to fetch content internally",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new content item and immediately assigns it to the specified screen.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Content"
+                ],
+                "summary": "Create and assign content to screen",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the screen",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Content details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.CreateAndAssignContentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Content"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/screens/{id}/status": {
+            "put": {
+                "description": "Updates the operational status of a screen.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Screens"
+                ],
+                "summary": "Update screen status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the screen",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.UpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Screen"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.Content": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "durationSeconds": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "e.g., IMAGE, VIDEO, HTML",
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Screen": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "e.g., OFFLINE, ONLINE, MAINTENANCE",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "interfaces.CreateAndAssignContentRequest": {
+            "type": "object",
+            "properties": {
+                "duration_seconds": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Welcome Video"
+                },
+                "type": {
+                    "description": "IMAGE, VIDEO, HTML",
+                    "type": "string",
+                    "example": "VIDEO"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://example.com/video.mp4"
+                }
+            }
+        },
+        "interfaces.CreateScreenRequest": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "example": "Main Entrance"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Lobby Display"
+                }
+            }
+        },
+        "interfaces.UpdateStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "ONLINE"
+                }
+            }
+        }
+    }
+}

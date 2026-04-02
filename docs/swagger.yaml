@@ -1,0 +1,222 @@
+basePath: /
+definitions:
+  domain.Content:
+    properties:
+      createdAt:
+        type: string
+      durationSeconds:
+        type: integer
+      id:
+        type: string
+      title:
+        type: string
+      type:
+        description: e.g., IMAGE, VIDEO, HTML
+        type: string
+      url:
+        type: string
+    type: object
+  domain.Screen:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      status:
+        description: e.g., OFFLINE, ONLINE, MAINTENANCE
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  interfaces.CreateAndAssignContentRequest:
+    properties:
+      duration_seconds:
+        example: 30
+        type: integer
+      title:
+        example: Welcome Video
+        type: string
+      type:
+        description: IMAGE, VIDEO, HTML
+        example: VIDEO
+        type: string
+      url:
+        example: https://example.com/video.mp4
+        type: string
+    type: object
+  interfaces.CreateScreenRequest:
+    properties:
+      location:
+        example: Main Entrance
+        type: string
+      name:
+        example: Lobby Display
+        type: string
+    type: object
+  interfaces.UpdateStatusRequest:
+    properties:
+      status:
+        example: ONLINE
+        type: string
+    type: object
+host: localhost:8001
+info:
+  contact: {}
+  description: Public HTTP API for the Screen Service.
+  title: Signage Microservices API
+  version: 1.0.0
+paths:
+  /screens:
+    post:
+      consumes:
+      - application/json
+      description: Provisions a new digital signage screen in the system.
+      parameters:
+      - description: Screen creation info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.CreateScreenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Screen'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Create a new screen
+      tags:
+      - Screens
+  /screens/{id}:
+    get:
+      description: Retrieves the metadata of a specific screen.
+      parameters:
+      - description: UUID of the screen
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Screen'
+        "404":
+          description: Screen not found
+          schema:
+            type: string
+      summary: Get screen by ID
+      tags:
+      - Screens
+  /screens/{id}/content:
+    get:
+      description: Retrieves the currently assigned media contents for a given screen
+        from the internal microservice.
+      parameters:
+      - description: UUID of the screen
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Content'
+            type: array
+        "502":
+          description: failed to fetch content internally
+          schema:
+            type: string
+      summary: Get content assigned to screen
+      tags:
+      - Content
+    post:
+      consumes:
+      - application/json
+      description: Creates a new content item and immediately assigns it to the specified
+        screen.
+      parameters:
+      - description: UUID of the screen
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Content details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.CreateAndAssignContentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Content'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Create and assign content to screen
+      tags:
+      - Content
+  /screens/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Updates the operational status of a screen.
+      parameters:
+      - description: UUID of the screen
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Screen'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Update screen status
+      tags:
+      - Screens
+swagger: "2.0"

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package screen.v1;
+
+option go_package = "github.com/zaeemnadeem/golang-example-repo/api/proto/v1/screen;screen";
+
+// ScreenService manages the lifecycle and metadata of signage screens
+service ScreenService {
+  rpc CreateScreen(CreateScreenRequest) returns (CreateScreenResponse);
+  rpc GetScreen(GetScreenRequest) returns (GetScreenResponse);
+  rpc UpdateScreenStatus(UpdateScreenStatusRequest) returns (UpdateScreenStatusResponse);
+}
+
+enum ScreenStatus {
+  SCREEN_STATUS_UNSPECIFIED = 0;
+  SCREEN_STATUS_OFFLINE = 1;
+  SCREEN_STATUS_ONLINE = 2;
+  SCREEN_STATUS_MAINTENANCE = 3;
+}
+
+message Screen {
+  string id = 1;
+  string name = 2;
+  string location = 3;
+  ScreenStatus status = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message CreateScreenRequest {
+  string name = 1;
+  string location = 2;
+}
+
+message CreateScreenResponse {
+  Screen screen = 1;
+}
+
+message GetScreenRequest {
+  string id = 1;
+}
+
+message GetScreenResponse {
+  Screen screen = 1;
+}
+
+message UpdateScreenStatusRequest {
+  string id = 1;
+  ScreenStatus status = 2;
+}
+
+message UpdateScreenStatusResponse {
+  Screen screen = 1;
+}
